@@ -38,3 +38,4 @@ assets/fonts/*.otf
 
 # MkDocs build output (published to the gh-pages branch by mike)
 site/
+dist/

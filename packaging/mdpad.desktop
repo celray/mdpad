@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=mdpad
+GenericName=Markdown Viewer
+Comment=Lightweight markdown viewer
+Exec=mdpad %F
+Icon=mdpad
+Terminal=false
+Categories=Utility;Viewer;TextTools;
+MimeType=text/markdown;text/x-markdown;
+StartupNotify=true

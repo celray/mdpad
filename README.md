@@ -1,8 +1,14 @@
-# mdpad
+<p align="center">
+  <img src="assets/mdpad.svg" width="120" alt="mdpad logo">
+</p>
+
+<h1 align="center">mdpad</h1>
 
 A lightweight, cross-platform markdown viewer with infinite scroll rendering.
 
 Built with SDL3, SDL_ttf, and md4c.
+
+Documentation: https://celray.github.io/mdpad/
 
 ## Building
 
