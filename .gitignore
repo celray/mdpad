@@ -35,3 +35,6 @@ vcpkg_installed/
 
 # Bundled fonts ship with the repo (assets/fonts/*.ttf). Other binaries stay out.
 assets/fonts/*.otf
+
+# MkDocs build output (published to the gh-pages branch by mike)
+site/
