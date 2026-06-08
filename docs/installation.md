@@ -39,18 +39,32 @@ a `~/.local` install later, delete `~/.local/lib/mdpad` and `~/.local/bin/mdpad`
 The sections below cover the manual options: the `.deb` package and the
 portable tarball.
 
+## Updating
+
+mdpad can update itself to the latest release:
+
+```bash
+mdpad --update         # download and install the newest release
+mdpad --check-update   # just report whether a newer release exists
+mdpad --version        # show the installed version
+```
+
+`mdpad --update` reuses the one-line installer, so it updates a `~/.local`
+install in place (no root). mdpad also checks for new releases in the
+background once a day and, when one is available, notes it in the window title.
+
 ## Downloads
 
 | Platform | x86_64 / amd64 | ARM64 |
 |----------|----------------|-------|
-| Linux (Debian/Ubuntu) | `mdpad_1.0_amd64.deb` | _coming soon_ |
-| Linux (portable) | `mdpad-1.0-linux-x86_64.tar.gz` | _coming soon_ |
+| Linux (Debian/Ubuntu) | `mdpad_1.1_amd64.deb` | _coming soon_ |
+| Linux (portable) | `mdpad-1.1-linux-x86_64.tar.gz` | _coming soon_ |
 | Windows / macOS | build from source | build from source |
 
 ## Debian / Ubuntu (.deb)
 
 ```bash
-sudo apt install ./mdpad_1.0_amd64.deb
+sudo apt install ./mdpad_1.1_amd64.deb
 ```
 
 This installs the application to `/opt/mdpad` with a `mdpad` command on your
@@ -64,8 +78,8 @@ sudo apt remove mdpad
 ## Portable tarball (any distribution)
 
 ```bash
-tar xzf mdpad-1.0-linux-x86_64.tar.gz
-cd mdpad-1.0-linux-x86_64
+tar xzf mdpad-1.1-linux-x86_64.tar.gz
+cd mdpad-1.1-linux-x86_64
 ./mdpad
 ```
 

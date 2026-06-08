@@ -1,5 +1,7 @@
 #include "markdown_parser.h"
 
+#include "html_parser.h"
+
 #include <md4c.h>
 
 #include <cstdlib>
@@ -24,11 +26,20 @@ struct ParseState {
     Block current;
     bool has_current = false;
 
-    // Inline formatting flags.
-    bool in_bold = false;
-    bool in_italic = false;
-    bool in_code = false;
-    bool in_strikethrough = false;
+    // Inline formatting state (bold/italic/code/strike + underline, links,
+    // colours from inline HTML).  Shared with the HTML parser.
+    InlineState inl;
+
+    // Raw block-level HTML accumulates here between MD_BLOCK_HTML
+    // enter/leave, then gets handed to the HTML parser.
+    bool in_html_block = false;
+    std::string html_buffer;
+
+    // Image capture — while inside a Markdown image span, the alt text is
+    // collected here instead of being added as ordinary spans.
+    bool in_image = false;
+    std::string image_alt;
+    std::string image_src;
 
     // Table state — while inside a TH/TD, text should be routed into the
     // current cell instead of the block's top-level spans.  We store a
@@ -65,26 +76,74 @@ static std::vector<TextSpan>* target_spans(ParseState* s) {
     return &s->current.spans;
 }
 
+static bool same_style(const TextSpan& a, const TextSpan& b) {
+    return a.bold == b.bold && a.italic == b.italic && a.code == b.code &&
+           a.strikethrough == b.strikethrough && a.underline == b.underline &&
+           a.mark == b.mark && a.is_image == b.is_image && !a.is_image &&
+           a.link == b.link && a.has_color == b.has_color && a.cr == b.cr &&
+           a.cg == b.cg && a.cb == b.cb;
+}
+
 static void append_text(ParseState* s, const char* text, size_t size) {
+    // Inside a Markdown image span, the text is the alt; capture it.
+    if (s->in_image) {
+        s->image_alt.append(text, size);
+        return;
+    }
+
     auto* spans = target_spans(s);
     if (!spans) return;
 
-    if (!spans->empty()) {
-        auto& back = spans->back();
-        if (back.bold == s->in_bold && back.italic == s->in_italic &&
-            back.code == s->in_code && back.strikethrough == s->in_strikethrough) {
-            back.text.append(text, size);
-            return;
-        }
-    }
-
     TextSpan span;
+    s->inl.stamp(span);
     span.text.assign(text, size);
-    span.bold = s->in_bold;
-    span.italic = s->in_italic;
-    span.code = s->in_code;
-    span.strikethrough = s->in_strikethrough;
+
+    if (!spans->empty() && same_style(spans->back(), span)) {
+        spans->back().text.append(text, size);
+        return;
+    }
     spans->push_back(std::move(span));
+}
+
+static std::string attr_to_string(const MD_ATTRIBUTE& a) {
+    if (!a.text || a.size == 0) return std::string();
+    return html_decode_entities(std::string(a.text, a.size));
+}
+
+// Push an image placeholder span (Markdown or inline-HTML images render the
+// same way: the alt text, styled, with the source kept for later).
+static void push_image(ParseState* s, const std::string& alt,
+                       const std::string& src) {
+    auto* spans = target_spans(s);
+    if (!spans) return;
+    TextSpan span;
+    s->inl.stamp(span);
+    span.is_image = true;
+    span.src = src;
+    std::string label = alt;
+    if (label.empty()) {
+        size_t slash = src.find_last_of('/');
+        label = (slash == std::string::npos) ? src : src.substr(slash + 1);
+        size_t q = label.find('?');
+        if (q != std::string::npos) label = label.substr(0, q);
+    }
+    if (label.empty()) label = "image";
+    span.text = label;
+    spans->push_back(std::move(span));
+}
+
+// --- inline-HTML sink, bridging to the shared interpreter ------------------
+static void sink_text(void* ctx, const std::string& text) {
+    auto* s = static_cast<ParseState*>(ctx);
+    append_text(s, text.data(), text.size());
+}
+static void sink_image(void* ctx, const std::string& alt,
+                       const std::string& src) {
+    push_image(static_cast<ParseState*>(ctx), alt, src);
+}
+static void sink_break(void* ctx) {
+    const char nl = '\n';
+    append_text(static_cast<ParseState*>(ctx), &nl, 1);
 }
 
 // Minimal HTML entity decoder — handles the common named entities plus
@@ -140,6 +199,14 @@ static int on_enter_block(MD_BLOCKTYPE type, void* detail, void* userdata) {
 
     switch (type) {
     case MD_BLOCK_DOC:
+        break;
+
+    case MD_BLOCK_HTML:
+        // Begin accumulating a block-level HTML run; its raw text arrives
+        // through on_text and is parsed when the block closes.
+        flush_current(s);
+        s->in_html_block = true;
+        s->html_buffer.clear();
         break;
 
     case MD_BLOCK_UL:
@@ -284,6 +351,12 @@ static int on_leave_block(MD_BLOCKTYPE type, void* /*detail*/, void* userdata) {
     if (!s->stack.empty()) s->stack.pop_back();
 
     switch (type) {
+    case MD_BLOCK_HTML:
+        parse_html_block(s->html_buffer, s->doc->blocks);
+        s->in_html_block = false;
+        s->html_buffer.clear();
+        break;
+
     case MD_BLOCK_UL:
     case MD_BLOCK_OL:
         s->list_depth--;
@@ -341,13 +414,25 @@ static int on_leave_block(MD_BLOCKTYPE type, void* /*detail*/, void* userdata) {
     return 0;
 }
 
-static int on_enter_span(MD_SPANTYPE type, void* /*detail*/, void* userdata) {
+static int on_enter_span(MD_SPANTYPE type, void* detail, void* userdata) {
     auto* s = static_cast<ParseState*>(userdata);
     switch (type) {
-    case MD_SPAN_STRONG: s->in_bold = true; break;
-    case MD_SPAN_EM: s->in_italic = true; break;
-    case MD_SPAN_CODE: s->in_code = true; break;
-    case MD_SPAN_DEL: s->in_strikethrough = true; break;
+    case MD_SPAN_STRONG: s->inl.bold++; break;
+    case MD_SPAN_EM: s->inl.italic++; break;
+    case MD_SPAN_CODE: s->inl.code++; break;
+    case MD_SPAN_DEL: s->inl.strike++; break;
+    case MD_SPAN_A: {
+        auto* d = static_cast<MD_SPAN_A_DETAIL*>(detail);
+        s->inl.links.push_back(attr_to_string(d->href));
+        break;
+    }
+    case MD_SPAN_IMG: {
+        auto* d = static_cast<MD_SPAN_IMG_DETAIL*>(detail);
+        s->in_image = true;
+        s->image_alt.clear();
+        s->image_src = attr_to_string(d->src);
+        break;
+    }
     default: break;
     }
     return 0;
@@ -356,10 +441,19 @@ static int on_enter_span(MD_SPANTYPE type, void* /*detail*/, void* userdata) {
 static int on_leave_span(MD_SPANTYPE type, void* /*detail*/, void* userdata) {
     auto* s = static_cast<ParseState*>(userdata);
     switch (type) {
-    case MD_SPAN_STRONG: s->in_bold = false; break;
-    case MD_SPAN_EM: s->in_italic = false; break;
-    case MD_SPAN_CODE: s->in_code = false; break;
-    case MD_SPAN_DEL: s->in_strikethrough = false; break;
+    case MD_SPAN_STRONG: if (s->inl.bold > 0) s->inl.bold--; break;
+    case MD_SPAN_EM: if (s->inl.italic > 0) s->inl.italic--; break;
+    case MD_SPAN_CODE: if (s->inl.code > 0) s->inl.code--; break;
+    case MD_SPAN_DEL: if (s->inl.strike > 0) s->inl.strike--; break;
+    case MD_SPAN_A:
+        if (!s->inl.links.empty()) s->inl.links.pop_back();
+        break;
+    case MD_SPAN_IMG:
+        s->in_image = false;
+        push_image(s, s->image_alt, s->image_src);
+        s->image_alt.clear();
+        s->image_src.clear();
+        break;
     default: break;
     }
     return 0;
@@ -368,6 +462,13 @@ static int on_leave_span(MD_SPANTYPE type, void* /*detail*/, void* userdata) {
 static int on_text(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size,
                    void* userdata) {
     auto* s = static_cast<ParseState*>(userdata);
+
+    // Inside a block-level HTML run, collect the raw bytes verbatim; they get
+    // parsed as a unit when the block closes.
+    if (s->in_html_block) {
+        s->html_buffer.append(text, size);
+        return 0;
+    }
 
     switch (type) {
     case MD_TEXT_NULLCHAR: {
@@ -392,7 +493,17 @@ static int on_text(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size,
         append_text(s, decoded.data(), decoded.size());
         break;
     }
-    case MD_TEXT_HTML:
+    case MD_TEXT_HTML: {
+        // Inline raw HTML (e.g. <kbd>, <br>, <span style=...>, <a>).
+        InlineSink sink;
+        sink.state = &s->inl;
+        sink.ctx = s;
+        sink.emit_text = sink_text;
+        sink.emit_image = sink_image;
+        sink.emit_break = sink_break;
+        html_handle_inline_tag(std::string(text, size), sink);
+        break;
+    }
     case MD_TEXT_NORMAL:
     case MD_TEXT_CODE:
     case MD_TEXT_LATEXMATH:

@@ -121,9 +121,17 @@ private:
         SDL_Color color;
         bool has_bg = false;
         SDL_Color bg{};
+        bool underline = false;
+        bool strikethrough = false;
     };
     float layout_inline_runs(const std::vector<InlineRun>& runs, float x,
-                             float y, float max_width);
+                             float y, float max_width,
+                             Align align = Align::Left);
+
+    // Build an inline run from a span, resolving colour/background/decoration
+    // from the span's HTML attributes against the active theme.
+    InlineRun run_from_span(const Block& block, const TextSpan& span,
+                            SDL_Color default_color) const;
 
     SDL_Renderer* sdl_renderer_ = nullptr;
 

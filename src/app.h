@@ -101,6 +101,10 @@ private:
 
     // File watcher
     int inotify_fd_ = -1;
+
+    // Non-empty when a background check found a newer release available;
+    // surfaced in the window title.
+    std::string update_version_;
 };
 
 }  // namespace mdpad

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(mdpad VERSION 1.0.0 LANGUAGES CXX C)
+project(mdpad VERSION 1.1.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -48,9 +48,17 @@ add_executable(mdpad
     src/main.cpp
     src/app.cpp
     src/markdown_parser.cpp
+    src/html_parser.cpp
     src/renderer.cpp
     src/syntax_highlight.cpp
     src/html_export.cpp
+    src/updater.cpp
+)
+
+# Compile in the version string and the repository the updater pulls from.
+target_compile_definitions(mdpad PRIVATE
+    MDPAD_VERSION="${PROJECT_VERSION}"
+    MDPAD_REPO="celray/mdpad"
 )
 
 # Search for shared libraries next to the executable at runtime so the

@@ -12,7 +12,7 @@
 # the aarch64 packages when run on an ARM64 host.
 set -euo pipefail
 
-VERSION="${VERSION:-1.0}"
+VERSION="${VERSION:-1.1}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN="$ROOT/build/bin"
 PKG="$ROOT/packaging"

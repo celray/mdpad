@@ -54,14 +54,38 @@ std::string color_to_css(const SDL_Color& c) {
 std::string spans_to_html(const std::vector<TextSpan>& spans) {
     std::string out;
     for (const auto& s : spans) {
+        if (s.is_image) {
+            out += "<img src=\"" + html_escape(s.src) + "\" alt=\"" +
+                   html_escape(s.text) + "\">";
+            continue;
+        }
         std::string t = escape_with_br(s.text);
         if (s.code) t = "<code>" + t + "</code>";
         if (s.strikethrough) t = "<del>" + t + "</del>";
+        if (s.underline) t = "<u>" + t + "</u>";
+        if (s.mark) t = "<mark>" + t + "</mark>";
         if (s.italic) t = "<em>" + t + "</em>";
         if (s.bold) t = "<strong>" + t + "</strong>";
+        if (s.has_color) {
+            char buf[24];
+            std::snprintf(buf, sizeof(buf), "#%02x%02x%02x", s.cr, s.cg, s.cb);
+            t = "<span style=\"color:" + std::string(buf) + "\">" + t +
+                "</span>";
+        }
+        if (!s.link.empty()) {
+            t = "<a href=\"" + html_escape(s.link) + "\">" + t + "</a>";
+        }
         out += t;
     }
     return out;
+}
+
+const char* align_style(Align a) {
+    switch (a) {
+    case Align::Center: return " style=\"text-align:center\"";
+    case Align::Right: return " style=\"text-align:right\"";
+    default: return "";
+    }
 }
 
 const char* heading_tag(BlockType type) {
@@ -207,7 +231,8 @@ std::string document_to_html(const Document& doc, const Theme& theme,
         const auto& b = doc.blocks[i];
         switch (b.type) {
         case BlockType::Paragraph:
-            ss << "<p>" << spans_to_html(b.spans) << "</p>\n";
+            ss << "<p" << align_style(b.align) << ">" << spans_to_html(b.spans)
+               << "</p>\n";
             i++;
             break;
         case BlockType::Heading1:
@@ -217,8 +242,8 @@ std::string document_to_html(const Document& doc, const Theme& theme,
         case BlockType::Heading5:
         case BlockType::Heading6: {
             const char* t = heading_tag(b.type);
-            ss << "<" << t << ">" << spans_to_html(b.spans) << "</" << t
-               << ">\n";
+            ss << "<" << t << align_style(b.align) << ">"
+               << spans_to_html(b.spans) << "</" << t << ">\n";
             i++;
             break;
         }

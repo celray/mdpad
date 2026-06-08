@@ -71,6 +71,9 @@ BIN="$PREFIX/bin"
 DATA="$PREFIX/share"
 say "installing into $PREFIX..."
 mkdir -p "$LIB" "$BIN"
+# Unlink the old binary first so re-running this as an update doesn't trip over
+# a running mdpad (replacing a busy executable in place fails with ETXTBSY).
+rm -f "$LIB/mdpad"
 cp -a "$src/mdpad" "$src"/libSDL3.so* "$src"/libSDL3_ttf.so* "$src/assets" "$LIB/"
 ln -sf "$LIB/mdpad" "$BIN/mdpad"
 

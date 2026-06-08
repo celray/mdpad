@@ -18,7 +18,11 @@ the Linux builds run on most distributions without extra packages.
 - **Text selection and copy** by character, word, line, or the whole document.
 - **Caret navigation** with the arrow keys, word jumps, and document edges.
 - **Syntax highlighting** inside fenced code blocks.
+- **Embedded HTML** is rendered, not shown as raw tags: headings, paragraphs,
+  lists, tables, blockquotes, `<pre>`, links, images, `<kbd>`, `<mark>`,
+  colours, and centred `<div>` blocks.
 - **Export to HTML** for printing, themed to match what you see on screen.
+- **Self-update** with `mdpad --update`, pulling the latest release.
 - **Single instance**: opening a file hands it to the running window as a new
   tab instead of starting a second process.
 - **Light and dark** rendering themes.
@@ -35,15 +39,15 @@ the Linux builds run on most distributions without extra packages.
 === "Debian / Ubuntu"
 
     ```bash
-    sudo apt install ./mdpad_1.0_amd64.deb
+    sudo apt install ./mdpad_1.1_amd64.deb
     mdpad README.md
     ```
 
 === "Portable tarball"
 
     ```bash
-    tar xzf mdpad-1.0-linux-x86_64.tar.gz
-    cd mdpad-1.0-linux-x86_64
+    tar xzf mdpad-1.1-linux-x86_64.tar.gz
+    cd mdpad-1.1-linux-x86_64
     ./mdpad README.md
     ```
 

@@ -5,6 +5,8 @@
 <h1 align="center">mdpad</h1>
 
 A lightweight, cross-platform markdown viewer with infinite scroll rendering.
+Renders embedded HTML (headings, lists, tables, links, images, `<kbd>`,
+`<mark>`, colours, centred blocks) rather than showing the raw tags.
 
 Built with SDL3, SDL_ttf, and md4c.
 
@@ -19,9 +21,11 @@ installs it into `~/.local`:
 curl -fsSL https://raw.githubusercontent.com/celray/mdpad/master/install.sh | sh
 ```
 
-Re-run it any time to update. `MDPAD_PREFIX` changes the install location and
-`MDPAD_VERSION` pins a release. There are also a `.deb` and a portable tarball
-on the [releases page](https://github.com/celray/mdpad/releases/latest); see the
+Once installed, `mdpad --update` pulls the latest release in place (and
+`mdpad --check-update` just reports whether one exists). `MDPAD_PREFIX` changes
+the install location and `MDPAD_VERSION` pins a release. There are also a
+`.deb` and a portable tarball on the
+[releases page](https://github.com/celray/mdpad/releases/latest); see the
 [installation guide](https://celray.github.io/mdpad/installation/) for all the
 options.
 

@@ -34,6 +34,8 @@ struct Theme {
     // Misc
     SDL_Color hr;
     SDL_Color list_marker;
+    SDL_Color link;
+    SDL_Color mark_bg;      // <mark> highlight background
 
     // Syntax highlighting
     SDL_Color syn_keyword;
@@ -70,6 +72,8 @@ static constexpr Theme kLightTheme = {
 
     /* hr             */ {212, 212, 216, 255},
     /* list_marker    */ { 90, 110, 140, 255},
+    /* link           */ { 37,  99, 235, 255},   // blue
+    /* mark_bg        */ {254, 240, 138, 255},   // soft yellow
 
     /* syn_keyword    */ {139,  34, 170, 255},   // purple
     /* syn_string     */ { 22, 126,  75, 255},   // green

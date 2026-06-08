@@ -1,6 +1,7 @@
 #include "app.h"
 
 #include "html_export.h"
+#include "updater.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_dialog.h>
@@ -348,6 +349,11 @@ bool App::init(const std::vector<std::string>& file_paths) {
     setup_ipc_listener();
     setup_file_watcher();
 
+    // Surface any update found by a previous background check, then kick off
+    // a fresh (throttled, detached) check for next time.
+    update_version_ = cached_update_version();
+    maybe_spawn_update_check();
+
     // Text I-beam cursor over the document area.  We don't bother
     // swapping based on hover zone — the tab bar is a small strip and
     // an I-beam there is acceptable.
@@ -445,13 +451,14 @@ void App::switch_tab(int index) {
 }
 
 void App::update_window_title() {
+    std::string title = kWindowTitle;
     if (active_tab_ >= 0 && active_tab_ < static_cast<int>(tabs_.size())) {
-        std::string title = std::string(kWindowTitle) + " - " +
-                            tabs_[active_tab_].title;
-        SDL_SetWindowTitle(window_, title.c_str());
-    } else {
-        SDL_SetWindowTitle(window_, kWindowTitle);
+        title += " - " + tabs_[active_tab_].title;
     }
+    if (!update_version_.empty()) {
+        title += "  (update " + update_version_ + " available, run: mdpad --update)";
+    }
+    SDL_SetWindowTitle(window_, title.c_str());
 }
 
 void App::file_dialog_callback(void* userdata, const char* const* filelist,

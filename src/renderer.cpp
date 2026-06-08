@@ -237,7 +237,7 @@ struct PendingPiece {
 
 float Renderer::layout_inline_runs(const std::vector<InlineRun>& runs,
                                    float x_start, float y_start,
-                                   float max_width) {
+                                   float max_width, Align align) {
     if (runs.empty()) return y_start;
 
     std::vector<PendingPiece> line;
@@ -266,12 +266,28 @@ float Renderer::layout_inline_runs(const std::vector<InlineRun>& runs,
 
         int this_line_id = next_line_id_++;
 
+        // Horizontal alignment: shift the whole line so its content sits
+        // centred or flush-right within max_width.
+        float align_shift = 0.0f;
+        if (align != Align::Left && !line.empty()) {
+            float content_w = 0.0f;
+            for (const auto& p : line) {
+                float right = p.x_in_line + static_cast<float>(p.w) +
+                              (p.has_bg ? p.bg_pad_x : 0.0f);
+                content_w = std::max(content_w, right);
+            }
+            float slack = max_width - content_w;
+            if (slack > 0.0f) {
+                align_shift = (align == Align::Center) ? slack * 0.5f : slack;
+            }
+        }
+
         for (const auto& p : line) {
             float piece_top = line_y + static_cast<float>(max_ascent - p.ascent);
 
             if (p.has_bg) {
                 BgBox bg;
-                bg.x = x_start + p.x_in_line - p.bg_pad_x;
+                bg.x = x_start + align_shift + p.x_in_line - p.bg_pad_x;
                 bg.y = piece_top;
                 bg.w = static_cast<float>(p.w) + p.bg_pad_x * 2.0f;
                 bg.h = static_cast<float>(p.h);
@@ -282,7 +298,7 @@ float Renderer::layout_inline_runs(const std::vector<InlineRun>& runs,
 
             TextPiece tp;
             tp.texture = p.tex;
-            tp.x = x_start + p.x_in_line;
+            tp.x = x_start + align_shift + p.x_in_line;
             tp.y = piece_top;
             tp.w = p.w;
             tp.h = p.h;
@@ -330,9 +346,18 @@ float Renderer::layout_inline_runs(const std::vector<InlineRun>& runs,
 
             if (is_space && line.empty()) continue;
 
-            // Render.
+            // Render.  Underline / strikethrough are applied as a transient
+            // font style (the fonts are loaded NORMAL, so this is safe to
+            // toggle around the render call).
+            int extra_style = TTF_STYLE_NORMAL;
+            if (run.underline) extra_style |= TTF_STYLE_UNDERLINE;
+            if (run.strikethrough) extra_style |= TTF_STYLE_STRIKETHROUGH;
+            if (extra_style != TTF_STYLE_NORMAL)
+                TTF_SetFontStyle(run.font, extra_style);
             SDL_Surface* surf = TTF_RenderText_Blended(
                 run.font, tok.c_str(), tok.size(), run.color);
+            if (extra_style != TTF_STYLE_NORMAL)
+                TTF_SetFontStyle(run.font, TTF_STYLE_NORMAL);
             if (!surf) continue;
             SDL_Texture* tex = SDL_CreateTextureFromSurface(sdl_renderer_,
                                                              surf);
@@ -367,26 +392,45 @@ float Renderer::layout_inline_runs(const std::vector<InlineRun>& runs,
 // Block layout
 // ---------------------------------------------------------------------------
 
+Renderer::InlineRun Renderer::run_from_span(const Block& block,
+                                            const TextSpan& span,
+                                            SDL_Color default_color) const {
+    InlineRun run;
+    run.text = span.text;
+    run.font = font_for_span(block, span);
+    run.underline = span.underline;
+    run.strikethrough = span.strikethrough;
+
+    if (span.code) {
+        run.color = theme_.inline_code_text;
+        run.has_bg = true;
+        run.bg = theme_.inline_code_bg;
+    } else if (span.has_color) {
+        run.color = {span.cr, span.cg, span.cb, 255};
+    } else if (!span.link.empty() || span.is_image) {
+        run.color = theme_.link;
+    } else {
+        run.color = default_color;
+    }
+
+    if (span.mark) {
+        run.has_bg = true;
+        run.bg = theme_.mark_bg;
+        if (!span.has_color && span.link.empty()) run.color = theme_.text;
+    }
+    return run;
+}
+
 float Renderer::layout_text_block(const Block& block, float x, float y,
                                   float max_width) {
     std::vector<InlineRun> runs;
     SDL_Color default_color = color_for_block_text(block.type);
 
     for (const auto& span : block.spans) {
-        InlineRun run;
-        run.text = span.text;
-        run.font = font_for_span(block, span);
-        if (span.code) {
-            run.color = theme_.inline_code_text;
-            run.has_bg = true;
-            run.bg = theme_.inline_code_bg;
-        } else {
-            run.color = default_color;
-        }
-        runs.push_back(std::move(run));
+        runs.push_back(run_from_span(block, span, default_color));
     }
 
-    return layout_inline_runs(runs, x, y, max_width) - y;
+    return layout_inline_runs(runs, x, y, max_width, block.align) - y;
 }
 
 static std::vector<std::string> split_lines(const std::string& s) {
@@ -568,13 +612,23 @@ float Renderer::layout_table(const Block& block, float x, float y,
                 }
                 if (!f) f = font_regular_;
                 r.font = f;
+                r.underline = span.underline;
+                r.strikethrough = span.strikethrough;
 
                 if (span.code) {
                     r.color = theme_.inline_code_text;
                     r.has_bg = true;
                     r.bg = theme_.inline_code_bg;
+                } else if (span.has_color) {
+                    r.color = {span.cr, span.cg, span.cb, 255};
+                } else if (!span.link.empty() || span.is_image) {
+                    r.color = theme_.link;
                 } else {
                     r.color = theme_.text;
+                }
+                if (span.mark) {
+                    r.has_bg = true;
+                    r.bg = theme_.mark_bg;
                 }
                 runs.push_back(std::move(r));
             }
