@@ -10,6 +10,21 @@ Built with SDL3, SDL_ttf, and md4c.
 
 Documentation: https://celray.github.io/mdpad/
 
+## Install (Linux)
+
+One line, no root. Downloads the latest release for your architecture and
+installs it into `~/.local`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/celray/mdpad/master/install.sh | sh
+```
+
+Re-run it any time to update. `MDPAD_PREFIX` changes the install location and
+`MDPAD_VERSION` pins a release. There are also a `.deb` and a portable tarball
+on the [releases page](https://github.com/celray/mdpad/releases/latest); see the
+[installation guide](https://celray.github.io/mdpad/installation/) for all the
+options.
+
 ## Building
 
 Requirements:

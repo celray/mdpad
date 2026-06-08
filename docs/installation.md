@@ -4,6 +4,41 @@ The Linux builds bundle SDL3 and the fonts, so they run on most distributions
 with no extra packages. Pick whichever option suits your system. All downloads
 live on the [releases page](https://github.com/celray/mdpad/releases/latest).
 
+## Quick install (one line)
+
+The fastest way on Linux. This downloads the latest release for your
+architecture and installs it into `~/.local` (no root), adding a `mdpad`
+command and a menu entry:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/celray/mdpad/master/install.sh | sh
+```
+
+Prefer to read a script before piping it to a shell? Download it first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/celray/mdpad/master/install.sh -o install-mdpad.sh
+less install-mdpad.sh
+sh install-mdpad.sh
+```
+
+Re-run it any time to update to the newest release. A couple of environment
+variables change where and what it installs:
+
+```bash
+# install somewhere other than ~/.local
+curl -fsSL https://raw.githubusercontent.com/celray/mdpad/master/install.sh | MDPAD_PREFIX="$HOME/apps/mdpad" sh
+
+# pin a specific release instead of the latest
+curl -fsSL https://raw.githubusercontent.com/celray/mdpad/master/install.sh | MDPAD_VERSION=1.0 sh
+```
+
+Make sure `~/.local/bin` is on your `PATH`, then run `mdpad file.md`. To remove
+a `~/.local` install later, delete `~/.local/lib/mdpad` and `~/.local/bin/mdpad`.
+
+The sections below cover the manual options: the `.deb` package and the
+portable tarball.
+
 ## Downloads
 
 | Platform | x86_64 / amd64 | ARM64 |

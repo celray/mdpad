@@ -25,6 +25,13 @@ the Linux builds run on most distributions without extra packages.
 
 ## Quick start
 
+=== "One line (Linux)"
+
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/celray/mdpad/master/install.sh | sh
+    mdpad README.md
+    ```
+
 === "Debian / Ubuntu"
 
     ```bash
@@ -40,8 +47,10 @@ the Linux builds run on most distributions without extra packages.
     ./mdpad README.md
     ```
 
-Grab the downloads from the [latest release](https://github.com/celray/mdpad/releases/latest),
-or read the [installation guide](installation.md) for every option.
+The one-line installer pulls the latest release and installs it into `~/.local`
+with no root. Grab the downloads from the
+[latest release](https://github.com/celray/mdpad/releases/latest), or read the
+[installation guide](installation.md) for every option.
 
 ## Where to next
 
