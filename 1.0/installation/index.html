@@ -351,6 +351,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#quick-install-one-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick install (one line)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#downloads" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -538,6 +549,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#quick-install-one-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick install (one line)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#downloads" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -633,6 +655,29 @@
 <p>The Linux builds bundle SDL3 and the fonts, so they run on most distributions
 with no extra packages. Pick whichever option suits your system. All downloads
 live on the <a href="https://github.com/celray/mdpad/releases/latest">releases page</a>.</p>
+<h2 id="quick-install-one-line">Quick install (one line)<a class="headerlink" href="#quick-install-one-line" title="Permanent link">&para;</a></h2>
+<p>The fastest way on Linux. This downloads the latest release for your
+architecture and installs it into <code>~/.local</code> (no root), adding a <code>mdpad</code>
+command and a menu entry:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/celray/mdpad/master/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+<p>Prefer to read a script before piping it to a shell? Download it first:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/celray/mdpad/master/install.sh<span class="w"> </span>-o<span class="w"> </span>install-mdpad.sh
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>less<span class="w"> </span>install-mdpad.sh
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>sh<span class="w"> </span>install-mdpad.sh
+</code></pre></div>
+<p>Re-run it any time to update to the newest release. A couple of environment
+variables change where and what it installs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># install somewhere other than ~/.local</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/celray/mdpad/master/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nv">MDPAD_PREFIX</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/apps/mdpad&quot;</span><span class="w"> </span>sh
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># pin a specific release instead of the latest</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/celray/mdpad/master/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nv">MDPAD_VERSION</span><span class="o">=</span><span class="m">1</span>.0<span class="w"> </span>sh
+</code></pre></div>
+<p>Make sure <code>~/.local/bin</code> is on your <code>PATH</code>, then run <code>mdpad file.md</code>. To remove
+a <code>~/.local</code> install later, delete <code>~/.local/lib/mdpad</code> and <code>~/.local/bin/mdpad</code>.</p>
+<p>The sections below cover the manual options: the <code>.deb</code> package and the
+portable tarball.</p>
 <h2 id="downloads">Downloads<a class="headerlink" href="#downloads" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -661,24 +706,24 @@ live on the <a href="https://github.com/celray/mdpad/releases/latest">releases p
 </tbody>
 </table>
 <h2 id="debian-ubuntu-deb">Debian / Ubuntu (.deb)<a class="headerlink" href="#debian-ubuntu-deb" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./mdpad_1.0_amd64.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./mdpad_1.0_amd64.deb
 </code></pre></div>
 <p>This installs the application to <code>/opt/mdpad</code> with a <code>mdpad</code> command on your
 <code>PATH</code> and a desktop entry, so it also shows up in your application menu. To
 remove it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>remove<span class="w"> </span>mdpad
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>remove<span class="w"> </span>mdpad
 </code></pre></div>
 <h2 id="portable-tarball-any-distribution">Portable tarball (any distribution)<a class="headerlink" href="#portable-tarball-any-distribution" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>tar<span class="w"> </span>xzf<span class="w"> </span>mdpad-1.0-linux-x86_64.tar.gz
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">cd</span><span class="w"> </span>mdpad-1.0-linux-x86_64
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>./mdpad
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>tar<span class="w"> </span>xzf<span class="w"> </span>mdpad-1.0-linux-x86_64.tar.gz
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>mdpad-1.0-linux-x86_64
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>./mdpad
 </code></pre></div>
 <p>Everything mdpad needs (the SDL libraries and the fonts) sits in that folder.
 Keep the files together; the binary loads them from its own directory.</p>
 <h3 id="optional-install-for-your-user-no-root">Optional: install for your user, no root<a class="headerlink" href="#optional-install-for-your-user-no-root" title="Permanent link">&para;</a></h3>
 <p>The tarball includes an <code>install.sh</code> that copies mdpad into <code>~/.local</code> and adds
 a menu entry, without touching system directories:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>./install.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>./install.sh
 </code></pre></div>
 <p>Make sure <code>~/.local/bin</code> is on your <code>PATH</code>, then run <code>mdpad</code> from anywhere.</p>
 <h2 id="arm64-linux">ARM64 Linux<a class="headerlink" href="#arm64-linux" title="Permanent link">&para;</a></h2>
