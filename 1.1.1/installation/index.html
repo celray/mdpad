@@ -715,19 +715,19 @@ background once a day and, when one is available, notes it in the window title.<
 <tr>
 <th>Platform</th>
 <th>x86_64 / amd64</th>
-<th>ARM64</th>
+<th>ARM64 / aarch64</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Linux (Debian/Ubuntu)</td>
 <td><code>mdpad_1.1.1_amd64.deb</code></td>
-<td><em>coming soon</em></td>
+<td><code>mdpad_1.1.1_arm64.deb</code></td>
 </tr>
 <tr>
 <td>Linux (portable)</td>
 <td><code>mdpad-1.1.1-linux-x86_64.tar.gz</code></td>
-<td><em>coming soon</em></td>
+<td><code>mdpad-1.1.1-linux-aarch64.tar.gz</code></td>
 </tr>
 <tr>
 <td>Windows / macOS</td>
@@ -758,8 +758,11 @@ a menu entry, without touching system directories:</p>
 </code></pre></div>
 <p>Make sure <code>~/.local/bin</code> is on your <code>PATH</code>, then run <code>mdpad</code> from anywhere.</p>
 <h2 id="arm64-linux">ARM64 Linux<a class="headerlink" href="#arm64-linux" title="Permanent link">&para;</a></h2>
-<p>ARM64 packages are on the way. Until then, <a href="../building/">build from
-source</a> on the target machine.</p>
+<p>ARM64 (aarch64) packages ship with every release, so all the options above work
+the same way. The one-line installer detects your architecture automatically.
+For the manual options, use the ARM64 files: install
+<code>sudo apt install ./mdpad_1.1.1_arm64.deb</code>, or unpack
+<code>mdpad-1.1.1-linux-aarch64.tar.gz</code> and run <code>./mdpad</code>.</p>
 <h2 id="windows-and-macos">Windows and macOS<a class="headerlink" href="#windows-and-macos" title="Permanent link">&para;</a></h2>
 <p>There are no prebuilt binaries yet. The project builds on both from source with
 CMake. See <a href="../building/">Building from source</a>.</p>

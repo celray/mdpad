@@ -640,9 +640,13 @@ from there or keep those files together when you move them.</p>
 <li><strong>Linux</strong>: GCC 9+ or Clang 10+, plus the video headers listed above.</li>
 </ul>
 <h2 id="building-other-architectures">Building other architectures<a class="headerlink" href="#building-other-architectures" title="Permanent link">&para;</a></h2>
-<p>The same build works on ARM64 Linux; run it on the target machine (or a matching
-toolchain) to produce ARM64 binaries. The release packages are assembled from
-the contents of <code>build/bin/</code>.</p>
+<p>Prebuilt x86_64 and ARM64 (aarch64) Linux packages ship with every release, so
+most people can skip this (see <a href="../installation/">Installation</a>). The same build
+also runs on any other architecture: run it on the target machine (or a matching
+toolchain) to produce native binaries. <code>packaging/build-linux.sh</code> reads
+<code>uname -m</code>, so running it on an ARM64 host produces the aarch64 tarball and the
+arm64 <code>.deb</code>. The release packages are assembled from the contents of
+<code>build/bin/</code>.</p>
 
 
 
