@@ -39,15 +39,15 @@ the Linux builds run on most distributions without extra packages.
 === "Debian / Ubuntu"
 
     ```bash
-    sudo apt install ./mdpad_1.1_amd64.deb
+    sudo apt install ./mdpad_1.1.1_amd64.deb
     mdpad README.md
     ```
 
 === "Portable tarball"
 
     ```bash
-    tar xzf mdpad-1.1-linux-x86_64.tar.gz
-    cd mdpad-1.1-linux-x86_64
+    tar xzf mdpad-1.1.1-linux-x86_64.tar.gz
+    cd mdpad-1.1.1-linux-x86_64
     ./mdpad README.md
     ```
 

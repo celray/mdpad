@@ -79,6 +79,19 @@ ln -sf "$LIB/mdpad" "$BIN/mdpad"
 
 # desktop entry, MIME glob, and icons -> default opener for Markdown files
 cp -a "$src/share/." "$DATA/"
+
+# Point the launcher at the absolute binary path.  ~/.local/bin is often not
+# on the desktop session's PATH, so a bare "Exec=mdpad" makes file managers
+# fail with "cannot find program mdpad".  SDL resolves the symlink, so the
+# binary still finds its bundled assets.
+desktop="$DATA/applications/mdpad.desktop"
+if [ -f "$desktop" ]; then
+  awk -v bin="$BIN/mdpad" '
+    /^Exec=/ { print "Exec=" bin " %F"; next }
+    { print }
+  ' "$desktop" > "$desktop.tmp" && mv "$desktop.tmp" "$desktop"
+fi
+
 update-mime-database    "$DATA/mime"           >/dev/null 2>&1 || true
 update-desktop-database "$DATA/applications"   >/dev/null 2>&1 || true
 gtk-update-icon-cache -q -t -f "$DATA/icons/hicolor" >/dev/null 2>&1 || true

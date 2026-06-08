@@ -12,7 +12,7 @@
 # the aarch64 packages when run on an ARM64 host.
 set -euo pipefail
 
-VERSION="${VERSION:-1.1}"
+VERSION="${VERSION:-1.1.1}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN="$ROOT/build/bin"
 PKG="$ROOT/packaging"
@@ -85,15 +85,25 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 LIB="$HOME/.local/lib/mdpad"
 DATA="$HOME/.local/share"
 mkdir -p "$LIB" "$HOME/.local/bin"
+rm -f "$LIB/mdpad"
 cp -a "$HERE/mdpad" "$HERE"/libSDL3.so* "$HERE"/libSDL3_ttf.so* "$HERE/assets" "$LIB/"
 ln -sf "$LIB/mdpad" "$HOME/.local/bin/mdpad"
 cp -a "$HERE/share/." "$DATA/"
+# Absolute Exec path: ~/.local/bin may not be on the desktop session's PATH,
+# which would make file managers fail with "cannot find program mdpad".
+desktop="$DATA/applications/mdpad.desktop"
+if [ -f "$desktop" ]; then
+  awk -v bin="$HOME/.local/bin/mdpad" '
+    /^Exec=/ { print "Exec=" bin " %F"; next }
+    { print }
+  ' "$desktop" > "$desktop.tmp" && mv "$desktop.tmp" "$desktop"
+fi
 update-mime-database "$DATA/mime" >/dev/null 2>&1 || true
 update-desktop-database "$DATA/applications" >/dev/null 2>&1 || true
 gtk-update-icon-cache -q -t -f "$DATA/icons/hicolor" >/dev/null 2>&1 || true
 xdg-mime default mdpad.desktop text/markdown >/dev/null 2>&1 || true
-echo "Installed. Ensure ~/.local/bin is on your PATH, then run: mdpad"
-echo "Markdown files now open with mdpad (you may need to log out/in once)."
+echo "Installed. Markdown files now open with mdpad (you may need to log out/in once)."
+echo "Run it from a terminal with ~/.local/bin on your PATH: mdpad"
 EOF
 chmod +x "$tb/install.sh"
 
