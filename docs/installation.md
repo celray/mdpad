@@ -55,10 +55,10 @@ background once a day and, when one is available, notes it in the window title.
 
 ## Downloads
 
-| Platform | x86_64 / amd64 | ARM64 |
-|----------|----------------|-------|
-| Linux (Debian/Ubuntu) | `mdpad_1.1.1_amd64.deb` | _coming soon_ |
-| Linux (portable) | `mdpad-1.1.1-linux-x86_64.tar.gz` | _coming soon_ |
+| Platform | x86_64 / amd64 | ARM64 / aarch64 |
+|----------|----------------|-----------------|
+| Linux (Debian/Ubuntu) | `mdpad_1.1.1_amd64.deb` | `mdpad_1.1.1_arm64.deb` |
+| Linux (portable) | `mdpad-1.1.1-linux-x86_64.tar.gz` | `mdpad-1.1.1-linux-aarch64.tar.gz` |
 | Windows / macOS | build from source | build from source |
 
 ## Debian / Ubuntu (.deb)
@@ -99,8 +99,11 @@ Make sure `~/.local/bin` is on your `PATH`, then run `mdpad` from anywhere.
 
 ## ARM64 Linux
 
-ARM64 packages are on the way. Until then, [build from
-source](building.md) on the target machine.
+ARM64 (aarch64) packages ship with every release, so all the options above work
+the same way. The one-line installer detects your architecture automatically.
+For the manual options, use the ARM64 files: install
+`sudo apt install ./mdpad_1.1.1_arm64.deb`, or unpack
+`mdpad-1.1.1-linux-aarch64.tar.gz` and run `./mdpad`.
 
 ## Windows and macOS
 

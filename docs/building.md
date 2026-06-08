@@ -45,6 +45,10 @@ from there or keep those files together when you move them.
 
 ## Building other architectures
 
-The same build works on ARM64 Linux; run it on the target machine (or a matching
-toolchain) to produce ARM64 binaries. The release packages are assembled from
-the contents of `build/bin/`.
+Prebuilt x86_64 and ARM64 (aarch64) Linux packages ship with every release, so
+most people can skip this (see [Installation](installation.md)). The same build
+also runs on any other architecture: run it on the target machine (or a matching
+toolchain) to produce native binaries. `packaging/build-linux.sh` reads
+`uname -m`, so running it on an ARM64 host produces the aarch64 tarball and the
+arm64 `.deb`. The release packages are assembled from the contents of
+`build/bin/`.
